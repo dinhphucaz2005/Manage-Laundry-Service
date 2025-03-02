@@ -21,5 +21,7 @@ data class Shop(
     @Column(name = "created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @Column(name = "updated_at")
-    val updatedAt: LocalDateTime = LocalDateTime.now()
+    val updatedAt: LocalDateTime = LocalDateTime.now(),
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0
 )
