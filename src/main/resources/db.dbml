@@ -1,0 +1,77 @@
+Table users {
+  id uuid [pk]
+  name varchar
+  email varchar [unique]
+  password varchar
+  phone varchar
+  role varchar // 'owner', 'staff', 'customer', 'admin'
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table shops {
+  id uuid [pk]
+  owner_id uuid [ref: > users.id]
+  name varchar
+  location varchar
+  description text
+  open_time time
+  close_time time
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table services {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  name varchar
+  description text
+  price decimal
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table staffs {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  shop_id uuid [ref: > shops.id]
+  position varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table orders {
+  id uuid [pk]
+  customer_id uuid [ref: > users.id]
+  shop_id uuid [ref: > shops.id]
+  total_price decimal
+  status varchar // 'pending', 'processing', 'completed', 'cancelled'
+  special_instructions text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table order_items {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  service_id uuid [ref: > services.id]
+  quantity int
+  price decimal
+}
+
+Table payments {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  amount decimal
+  payment_method varchar
+  paid_at timestamp
+}
+
+Table reviews {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  customer_id uuid [ref: > users.id]
+  rating int // 1-10 sao
+  comment text
+  created_at timestamp
+}
