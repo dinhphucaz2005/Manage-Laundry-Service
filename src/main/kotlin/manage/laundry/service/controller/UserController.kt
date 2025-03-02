@@ -1,29 +1,43 @@
 package manage.laundry.service.controller
 
-import manage.laundry.service.dto.request.CreateUserRequest
-import org.springframework.web.bind.annotation.*
-import jakarta.validation.Valid
 import manage.laundry.service.common.ApiResponse
-import manage.laundry.service.dto.response.UserResponse
+import manage.laundry.service.dto.request.LoginRequest
+import manage.laundry.service.dto.request.RegisterRequest
+import manage.laundry.service.dto.response.LoginResponse
+import manage.laundry.service.entity.User
 import manage.laundry.service.service.UserService
 import org.springframework.http.ResponseEntity
-
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/auth")
 class UserController(
     private val userService: UserService
 ) {
 
-    @PostMapping
-    fun createUser(@RequestBody @Valid request: CreateUserRequest): ResponseEntity<ApiResponse<UserResponse>> {
-        val user = userService.createUser(request)
-        return ResponseEntity.ok(ApiResponse.success(UserResponse.fromEntity(user), "User created successfully"))
+    @PostMapping("/register/owner")
+    fun registerOwner(@RequestBody request: RegisterRequest): ResponseEntity<ApiResponse<User>> {
+        val user = userService.registerUser(request, User.Role.OWNER)
+        return ResponseEntity.ok(ApiResponse.success(user, "Owner registered successfully"))
     }
 
-    @GetMapping("/{id}")
-    fun getUserById(@PathVariable id: Int): ResponseEntity<ApiResponse<UserResponse>> {
-        val user = userService.getUserById(id)
-        return ResponseEntity.ok(ApiResponse.success(UserResponse.fromEntity(user), "User fetched successfully"))
+    @PostMapping("/register/staff")
+    fun registerStaff(@RequestBody request: RegisterRequest): ResponseEntity<ApiResponse<User>> {
+        val user = userService.registerUser(request, User.Role.STAFF)
+        return ResponseEntity.ok(ApiResponse.success(user, "Staff registered successfully"))
     }
+
+    @PostMapping("/register/customer")
+    fun registerCustomer(@RequestBody request: RegisterRequest): ResponseEntity<ApiResponse<User>> {
+        val user = userService.registerUser(request, User.Role.CUSTOMER)
+        return ResponseEntity.ok(ApiResponse.success(user, "Customer registered successfully"))
+    }
+
+
+    @PostMapping("/login")
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<ApiResponse<LoginResponse>> {
+        val response = userService.login(request)
+        return ResponseEntity.ok(ApiResponse.success(response, "Login successful"))
+    }
+
 }

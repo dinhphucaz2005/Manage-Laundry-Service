@@ -1,5 +1,5 @@
 Table users {
-  id uuid [pk]
+  id int [pk]
   name varchar
   email varchar [unique]
   password varchar
@@ -10,8 +10,8 @@ Table users {
 }
 
 Table shops {
-  id uuid [pk]
-  owner_id uuid [ref: > users.id]
+  id int [pk]
+  owner_id int [ref: > users.id]
   name varchar
   location varchar
   description text
@@ -22,8 +22,8 @@ Table shops {
 }
 
 Table services {
-  id uuid [pk]
-  shop_id uuid [ref: > shops.id]
+  id int [pk]
+  shop_id int [ref: > shops.id]
   name varchar
   description text
   price decimal
@@ -32,18 +32,18 @@ Table services {
 }
 
 Table staffs {
-  id uuid [pk]
-  user_id uuid [ref: > users.id]
-  shop_id uuid [ref: > shops.id]
+  id int [pk]
+  user_id int [ref: > users.id]
+  shop_id int [ref: > shops.id]
   position varchar
   created_at timestamp
   updated_at timestamp
 }
 
 Table orders {
-  id uuid [pk]
-  customer_id uuid [ref: > users.id]
-  shop_id uuid [ref: > shops.id]
+  id int [pk]
+  customer_id int [ref: > users.id]
+  shop_id int [ref: > shops.id]
   total_price decimal
   status varchar // 'pending', 'processing', 'completed', 'cancelled'
   special_instructions text
@@ -52,25 +52,25 @@ Table orders {
 }
 
 Table order_items {
-  id uuid [pk]
-  order_id uuid [ref: > orders.id]
-  service_id uuid [ref: > services.id]
+  id int [pk]
+  order_id int [ref: > orders.id]
+  service_id int [ref: > services.id]
   quantity int
   price decimal
 }
 
 Table payments {
-  id uuid [pk]
-  order_id uuid [ref: > orders.id]
+  id int [pk]
+  order_id int [ref: > orders.id]
   amount decimal
   payment_method varchar
   paid_at timestamp
 }
 
 Table reviews {
-  id uuid [pk]
-  order_id uuid [ref: > orders.id]
-  customer_id uuid [ref: > users.id]
+  id int [pk]
+  order_id int [ref: > orders.id]
+  customer_id int [ref: > users.id]
   rating int // 1-10 sao
   comment text
   created_at timestamp

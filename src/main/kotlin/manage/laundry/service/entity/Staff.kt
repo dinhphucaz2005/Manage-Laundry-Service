@@ -12,7 +12,6 @@ data class Staff(
     val user: User,
     @ManyToOne @JoinColumn(name = "shop_id")
     val shop: Shop,
-    val position: String,
     @Column(name = "created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @Column(name = "updated_at")

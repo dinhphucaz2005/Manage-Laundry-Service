@@ -19,7 +19,7 @@ class DataInitializer {
         shopRepository: ShopRepository,
         orderRepository: OrderRepository
     ) = CommandLineRunner {
-
+        return@CommandLineRunner
         if (userRepository.count() == 0L) {
             // Tạo user
             val user = User(
