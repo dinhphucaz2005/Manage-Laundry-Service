@@ -11,7 +11,7 @@ data class OrderItem(
     @ManyToOne @JoinColumn(name = "order_id")
     val order: Order,
     @ManyToOne @JoinColumn(name = "service_id")
-    val service: Service,
+    val shopService: ShopService,
     val quantity: Int,
     val price: BigDecimal
 )

@@ -1,18 +1,18 @@
 package manage.laundry.service.dto.request
 
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.Size
 import java.math.BigDecimal
 
-data class CreateServiceRequest(
+data class UpdateServiceRequest(
     @field:NotBlank(message = "Tên dịch vụ không được để trống")
+    @field:Size(min = 2, max = 100, message = "Tên dịch vụ phải từ 2 đến 100 ký tự")
     val name: String,
 
     @field:NotBlank(message = "Mô tả không được để trống")
     val description: String,
 
-    @field:NotNull(message = "Giá dịch vụ không được để trống")
-    @field:Positive(message = "Giá dịch vụ phải lớn hơn 0")
+    @field:Min(value = 1000, message = "Giá dịch vụ phải lớn hơn 1000")
     val price: BigDecimal
 )

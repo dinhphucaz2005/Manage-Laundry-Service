@@ -25,6 +25,12 @@ data class Order(
     val updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
     enum class Status {
-        PENDING, PROCESSING, COMPLETED, PAID, CANCELLED
+        PENDING,
+        PROCESSING,
+        CONFIRMED,
+        IN_PROGRESS,
+        READY_FOR_DELIVERY,
+        COMPLETED,
+        CANCELLED
     }
 }

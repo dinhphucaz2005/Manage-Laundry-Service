@@ -7,21 +7,43 @@ import java.time.LocalTime
 @Entity
 @Table(name = "shops")
 data class Shop(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
-    @ManyToOne @JoinColumn(name = "owner_id")
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
     val owner: User,
+
+    @Column(nullable = false)
     val name: String,
+
+    @Column(nullable = false)
     val location: String,
-    val description: String,
-    @Column(name = "open_time")
-    val openTime: LocalTime,
-    @Column(name = "close_time")
-    val closeTime: LocalTime,
-    @Column(name = "created_at")
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    val description: String? = null,
+
+    @Column(name = "open_time", nullable = false)
+    val openTime: String,
+
+    @Column(name = "close_time", nullable = false)
+    val closeTime: String,
+
+    @Column(name = "created_at", updatable = false)
+    var createdAt: LocalDateTime = LocalDateTime.now(),
+
     @Column(name = "updated_at")
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0
-)
+    var updatedAt: LocalDateTime = LocalDateTime.now()
+) {
+
+    @PrePersist
+    fun onCreate() {
+        createdAt = LocalDateTime.now()
+        updatedAt = LocalDateTime.now()
+    }
+
+    @PreUpdate
+    fun onUpdate() {
+        updatedAt = LocalDateTime.now()
+    }
+}

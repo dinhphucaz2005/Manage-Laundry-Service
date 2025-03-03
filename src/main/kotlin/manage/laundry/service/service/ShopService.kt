@@ -1,56 +1,135 @@
 package manage.laundry.service.service
 
-import jakarta.persistence.EntityNotFoundException
-import manage.laundry.service.dto.request.CreateShopRequest
-import manage.laundry.service.dto.response.ShopResponse
-import manage.laundry.service.dto.response.StaffResponse
+import jakarta.transaction.Transactional
+import manage.laundry.service.configuration.PasswordEncoder
+import manage.laundry.service.dto.request.CreateServiceRequest
+import manage.laundry.service.dto.request.ShopRegisterRequest
+import manage.laundry.service.dto.request.StaffRegisterRequest
+import manage.laundry.service.dto.request.UpdateServiceRequest
+import manage.laundry.service.dto.response.*
 import manage.laundry.service.entity.Shop
+import manage.laundry.service.entity.ShopService
+import manage.laundry.service.entity.Staff
+import manage.laundry.service.entity.User
 import manage.laundry.service.repository.ShopRepository
+import manage.laundry.service.repository.ShopServiceRepository
 import manage.laundry.service.repository.StaffRepository
 import manage.laundry.service.repository.UserRepository
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.time.LocalTime
+import org.springframework.web.server.ResponseStatusException
+import java.time.LocalDateTime
 
 
 @Service
 class ShopService(
     private val shopRepository: ShopRepository,
     private val userRepository: UserRepository,
-    private val staffRepository: StaffRepository
+    private val staffRepository: StaffRepository,
+    private val shopServiceRepository: ShopServiceRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
-    fun create(request: CreateShopRequest, ownerId: Int): ShopResponse {
-        val owner = userRepository.findById(ownerId)
-            .orElseThrow { EntityNotFoundException("Owner not found") }
 
-        val shop = shopRepository.save(
-            Shop(
-                owner = owner,
-                name = request.name,
-                location = request.location,
-                description = request.description,
-                openTime = LocalTime.parse(request.openTime),
-                closeTime = LocalTime.parse(request.closeTime)
-            )
-        )
-        return ShopResponse.from(shop)
-    }
-
-    fun getStaffs(shopId: Int): List<StaffResponse> {
-        val shop = shopRepository.findById(shopId)
-            .orElseThrow { EntityNotFoundException("Shop not found") }
-        return staffRepository.findByShop(shop)
-            .map { StaffResponse.from(it) }
-    }
-
-    fun deleteStaff(shopId: Int, staffId: Int): Boolean {
-        val shop = shopRepository.findById(shopId)
-            .orElseThrow { EntityNotFoundException("Shop not found") }
-        val staff = staffRepository.findById(staffId)
-            .orElseThrow { EntityNotFoundException("Staff not found") }
-        if (staff.shop != shop) {
-            throw IllegalArgumentException("Staff does not belong to this shop")
+    fun registerOwnerWithShop(request: ShopRegisterRequest): RegisterOwnerResponse {
+        if (userRepository.existsByEmail(request.email)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email đã được sử dụng")
         }
-        staffRepository.delete(staff)
-        return true
+
+        val owner = User(
+            name = request.ownerName,
+            email = request.email,
+            password = passwordEncoder.encode(request.password),
+            phone = request.phone,
+            role = User.Role.OWNER
+        )
+        val savedOwner = userRepository.save(owner)
+
+        val shop = Shop(
+            owner = savedOwner,
+            name = request.shopName,
+            location = request.address,
+            openTime = request.openTime,
+            closeTime = request.closeTime
+        )
+        val savedShop = shopRepository.save(shop)
+
+        return RegisterOwnerResponse(
+            user = UserResponse.fromEntity(savedOwner),
+            shop = ShopResponse.fromEntity(savedShop)
+        )
     }
+
+    fun addStaffToShop(shopId: Int, request: StaffRegisterRequest): RegisterStaffResponse {
+        if (userRepository.existsByEmail(request.email)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email đã được sử dụng")
+        }
+
+        val shop = shopRepository.findById(shopId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy tiệm")
+        }
+
+        val staffUser = User(
+            name = request.name,
+            email = request.email,
+            password = passwordEncoder.encode(request.password),
+            phone = request.phone,
+            role = User.Role.STAFF
+        )
+        val savedStaffUser = userRepository.save(staffUser)
+
+        val staff = Staff(
+            user = savedStaffUser,
+            shop = shop
+        )
+        staffRepository.save(staff)
+
+        return RegisterStaffResponse(
+            staff = UserResponse.fromEntity(savedStaffUser),
+            shop = ShopResponse.fromEntity(shop)
+        )
+    }
+
+    fun addServiceToShop(shopId: Int, request: CreateServiceRequest): ShopServiceResponse {
+        val shop = shopRepository.findById(shopId)
+            .orElseThrow { Exception("Không tìm thấy tiệm với id = $shopId") }
+
+        val service = ShopService(
+            shop = shop,
+            name = request.name,
+            description = request.description,
+            price = request.price
+        )
+        val savedService = shopServiceRepository.save(service)
+
+        return ShopServiceResponse(
+            id = savedService.id,
+            name = savedService.name,
+            description = savedService.description,
+            price = savedService.price,
+            shopId = shop.id
+        )
+    }
+
+
+    @Transactional
+    fun updateService(serviceId: Int, request: UpdateServiceRequest) {
+        val service = shopServiceRepository.findById(serviceId)
+            .orElseThrow { Exception("Không tìm thấy dịch vụ với ID: $serviceId") }
+
+        val updatedService = service.copy(
+            name = request.name,
+            description = request.description,
+            price = request.price,
+            updatedAt = LocalDateTime.now()
+        )
+
+        shopServiceRepository.save(updatedService)
+    }
+
+    fun deleteService(serviceId: Int) {
+        val service = shopServiceRepository.findById(serviceId)
+            .orElseThrow { Exception("Dịch vụ không tồn tại") }
+        shopServiceRepository.delete(service)
+    }
+
 }

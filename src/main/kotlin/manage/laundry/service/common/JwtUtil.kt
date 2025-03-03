@@ -2,6 +2,7 @@ package manage.laundry.service.common
 
 
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import manage.laundry.service.entity.User
 import org.springframework.beans.factory.annotation.Value
@@ -17,28 +18,20 @@ class JwtUtil(
 
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(secret.toByteArray())
 
-    fun generateToken(userId: Int, email: String, role: User.Role): String {
+
+
+    fun generateToken(user: User): String {
         val now = Date()
         val expiryDate = Date(now.time + expirationTime)
 
         return Jwts.builder()
-            .setSubject(userId.toString())
-            .claim("email", email)
-            .claim("role", role.name)
+            .setSubject(user.id.toString())
+            .claim("role", user.role.name)
+            .claim("email", user.email)
             .setIssuedAt(now)
             .setExpiration(expiryDate)
-            .signWith(secretKey)
+            .signWith(secretKey, SignatureAlgorithm.HS256)
             .compact()
-    }
-
-    fun extractUserId(authHeader: String): Int {
-        val token = authHeader.removePrefix("Bearer ").trim()
-        val claims = Jwts.parserBuilder()
-            .setSigningKey(secretKey)
-            .build()
-            .parseClaimsJws(token)
-            .body
-        return claims.subject.toInt()
     }
 
 }

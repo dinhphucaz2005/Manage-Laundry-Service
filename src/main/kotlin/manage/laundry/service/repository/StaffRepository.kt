@@ -10,4 +10,7 @@ interface StaffRepository : JpaRepository<Staff, Int> {
     fun findByUserAndShop(user: User, shop: Shop): Staff?
 
     fun findByShop(shop: Shop?): List<Staff>
+
+    fun findByUserId(userId: Int): Staff?
+
 }

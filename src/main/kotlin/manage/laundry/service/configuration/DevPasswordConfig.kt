@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Profile
 
 interface PasswordEncoder {
     fun encode(password: String): String = password
+    fun matches(requestPassword: String, hashedPassword: String): Boolean {
+        return hashedPassword == requestPassword
+    }
 }
 
 class NoOpPasswordEncoder : PasswordEncoder {

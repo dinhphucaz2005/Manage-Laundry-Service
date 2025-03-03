@@ -2,40 +2,77 @@ package manage.laundry.service.controller
 
 import jakarta.validation.Valid
 import manage.laundry.service.common.ApiResponse
-import manage.laundry.service.common.JwtUtil
-import manage.laundry.service.dto.request.CreateShopRequest
-import manage.laundry.service.dto.response.ShopResponse
-import manage.laundry.service.dto.response.StaffResponse
+import manage.laundry.service.dto.request.CreateServiceRequest
+import manage.laundry.service.dto.request.ShopRegisterRequest
+import manage.laundry.service.dto.request.StaffRegisterRequest
+import manage.laundry.service.dto.request.UpdateServiceRequest
+import manage.laundry.service.dto.response.RegisterOwnerResponse
+import manage.laundry.service.dto.response.RegisterStaffResponse
+import manage.laundry.service.dto.response.ShopServiceResponse
 import manage.laundry.service.service.ShopService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
 @RestController
-@RequestMapping("/shops")
+@RequestMapping("/owners")
 class ShopController(
     private val shopService: ShopService,
-    private val jwtUtil: JwtUtil
 ) {
-    @PostMapping
-    fun createShop(
-        @Valid @RequestBody request: CreateShopRequest,
-        @RequestHeader("Authorization") token: String
-    ): ResponseEntity<ApiResponse<ShopResponse>> {
-        val ownerId = jwtUtil.extractUserId(token)
-        val shop = shopService.create(request, ownerId)
-        return ResponseEntity.ok(ApiResponse.success(shop, "Shop created successfully"))
+
+    @PostMapping("/register")
+    fun registerOwner(
+        @RequestBody @Valid request: ShopRegisterRequest
+    ): ResponseEntity<ApiResponse<RegisterOwnerResponse>> {
+        val result = shopService.registerOwnerWithShop(request)
+        return ResponseEntity.ok(ApiResponse.success(result, "Đăng ký chủ tiệm và tạo hồ sơ tiệm thành công"))
     }
 
-    @GetMapping("/{shopId}/staffs")
-    fun getStaffs(@PathVariable shopId: Int): ResponseEntity<ApiResponse<List<StaffResponse>>> {
-        val staffs = shopService.getStaffs(shopId)
-        return ResponseEntity.ok(ApiResponse.success(staffs))
+    @PostMapping("/shops/{shopId}/staffs")
+    fun addStaff(
+        @PathVariable shopId: Int,
+        @RequestBody @Valid request: StaffRegisterRequest
+    ): ResponseEntity<ApiResponse<RegisterStaffResponse>> {
+        val response = shopService.addStaffToShop(shopId, request)
+        return ResponseEntity.ok(
+            ApiResponse.success(response, "Thêm nhân viên vào tiệm thành công")
+        )
     }
 
-    @DeleteMapping("/{shopId}/staffs/{staffId}")
-    fun deleteStaff(@PathVariable shopId: Int, @PathVariable staffId: Int): ResponseEntity<ApiResponse<String>> {
-        shopService.deleteStaff(shopId, staffId)
-        return ResponseEntity.ok(ApiResponse.success(message = "Staff deleted successfully"))
+    @PostMapping("/shops/{shopId}/services")
+    fun addService(
+        @PathVariable shopId: Int,
+        @RequestBody @Valid request: CreateServiceRequest
+    ): ResponseEntity<ApiResponse<ShopServiceResponse>> {
+        val response = shopService.addServiceToShop(shopId, request)
+        return ResponseEntity.ok(
+            ApiResponse(
+                success = true,
+                message = "Thêm dịch vụ thành công",
+                data = response
+            )
+        )
     }
+
+    @PutMapping("/services/{serviceId}")
+    fun updateService(
+        @PathVariable serviceId: Int,
+        @RequestBody @Valid request: UpdateServiceRequest
+    ): ResponseEntity<ApiResponse<String>> {
+        shopService.updateService(serviceId, request)
+        return ResponseEntity.ok(
+            ApiResponse.success(message = "Cập nhật dịch vụ thành công")
+        )
+    }
+
+    @DeleteMapping("/services/{serviceId}")
+    fun deleteService(
+        @PathVariable serviceId: Int
+    ): ResponseEntity<ApiResponse<String>> {
+        shopService.deleteService(serviceId)
+        return ResponseEntity.ok(
+            ApiResponse.success(message = "Xóa dịch vụ thành công")
+        )
+    }
+
 }
