@@ -2,7 +2,6 @@ package manage.laundry.service.entity
 
 import jakarta.persistence.*
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 @Entity
 @Table(name = "shops")
@@ -33,7 +32,9 @@ data class Shop(
     var createdAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "updated_at")
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
+
+    val averageRating: Double = 5.0
 ) {
 
     @PrePersist

@@ -11,10 +11,7 @@ import manage.laundry.service.entity.Shop
 import manage.laundry.service.entity.ShopService
 import manage.laundry.service.entity.Staff
 import manage.laundry.service.entity.User
-import manage.laundry.service.repository.ShopRepository
-import manage.laundry.service.repository.ShopServiceRepository
-import manage.laundry.service.repository.StaffRepository
-import manage.laundry.service.repository.UserRepository
+import manage.laundry.service.repository.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -27,7 +24,8 @@ class ShopService(
     private val userRepository: UserRepository,
     private val staffRepository: StaffRepository,
     private val shopServiceRepository: ShopServiceRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val orderRepository: OrderRepository
 ) {
 
     fun registerOwnerWithShop(request: ShopRegisterRequest): RegisterOwnerResponse {
@@ -130,6 +128,27 @@ class ShopService(
         val service = shopServiceRepository.findById(serviceId)
             .orElseThrow { Exception("Dịch vụ không tồn tại") }
         shopServiceRepository.delete(service)
+    }
+
+    fun getShopOrders(shopId: Int, ownerId: Int): List<ShopOrderResponse> {
+        val shop = shopRepository.findById(shopId)
+            .orElseThrow { Exception("Tiệm không tồn tại") }
+
+        if (shop.owner.id != ownerId) {
+            throw Exception("Bạn không có quyền xem đơn hàng của tiệm này")
+        }
+
+        val orders = orderRepository.findByShop(shop)
+
+        return orders.map { order ->
+            ShopOrderResponse(
+                orderId = order.id,
+                customerName = order.customer.name,
+                totalPrice = order.totalPrice,
+                status = order.status,
+                createdAt = order.createdAt
+            )
+        }
     }
 
 }

@@ -2,14 +2,9 @@ package manage.laundry.service.controller
 
 import jakarta.validation.Valid
 import manage.laundry.service.common.ApiResponse
-import manage.laundry.service.dto.request.CreateServiceRequest
-import manage.laundry.service.dto.request.ShopRegisterRequest
-import manage.laundry.service.dto.request.StaffRegisterRequest
-import manage.laundry.service.dto.request.UpdateServiceRequest
-import manage.laundry.service.dto.response.RegisterOwnerResponse
-import manage.laundry.service.dto.response.RegisterStaffResponse
-import manage.laundry.service.dto.response.ShopServiceResponse
-import manage.laundry.service.service.ShopService
+import manage.laundry.service.dto.request.*
+import manage.laundry.service.dto.response.*
+import manage.laundry.service.service.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -18,6 +13,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/owners")
 class ShopController(
     private val shopService: ShopService,
+    private val userService: UserService,
+    private val ownerAuthService: OwnerAuthService,
+    private val customerOrderService: CustomerOrderService,
 ) {
 
     @PostMapping("/register")
@@ -75,4 +73,48 @@ class ShopController(
         )
     }
 
+    @GetMapping("/shops/{shopId}/orders")
+    fun getShopOrders(
+        @PathVariable shopId: Int,
+        @RequestHeader("Authorization") authorizationHeader: String
+    ): ResponseEntity<ApiResponse<List<ShopOrderResponse>>> {
+
+        val owner = userService.authenticateOwner(authorizationHeader)
+
+        val response = shopService.getShopOrders(shopId, owner.id)
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                data = response,
+                message = "Lấy danh sách đơn hàng của tiệm thành công"
+            )
+        )
+    }
+
+    @PostMapping("/login")
+    fun login(
+        @RequestBody @Valid request: OwnerLoginRequest
+    ): ResponseEntity<ApiResponse<LoginResponse>> {
+        val response = ownerAuthService.ownerLogin(request)
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                data = response,
+                message = "Đăng nhập thành công"
+            )
+        )
+    }
+
+    @PutMapping("/orders/{orderId}")
+    fun updateOrder(
+        @PathVariable orderId: Int,
+        @RequestHeader("Authorization") authorizationHeader: String,
+        @RequestBody @Valid request: UpdateOrderRequest
+    ): ResponseEntity<ApiResponse<String>> {
+
+        val user = userService.authenticateOwner(authorizationHeader)
+        customerOrderService.updateOrderByOwner(orderId, request, user.id)
+
+        return ResponseEntity.ok(
+            ApiResponse.success(message = "Cập nhật đơn hàng thành công")
+        )
+    }
 }

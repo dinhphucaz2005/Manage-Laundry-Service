@@ -2,7 +2,6 @@ package manage.laundry.service.controller
 
 import jakarta.validation.Valid
 import manage.laundry.service.common.ApiResponse
-import manage.laundry.service.common.JwtUtil
 import manage.laundry.service.dto.request.StaffLoginRequest
 import manage.laundry.service.dto.response.StaffLoginResponse
 import manage.laundry.service.service.StaffService
@@ -15,8 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/staff")
 class StaffController(
-    private val staffService: StaffService,
-    private val jwtUtil: JwtUtil
+    private val staffService: StaffService
 ) {
 
     @PostMapping("/login")

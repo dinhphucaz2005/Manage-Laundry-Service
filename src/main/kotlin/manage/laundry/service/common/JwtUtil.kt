@@ -18,8 +18,6 @@ class JwtUtil(
 
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(secret.toByteArray())
 
-
-
     fun generateToken(user: User): String {
         val now = Date()
         val expiryDate = Date(now.time + expirationTime)
@@ -33,5 +31,16 @@ class JwtUtil(
             .signWith(secretKey, SignatureAlgorithm.HS256)
             .compact()
     }
+
+    fun extractUserId(token: String): Int {
+        val claims = Jwts.parserBuilder()
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .body
+
+        return claims.subject.toInt()
+    }
+
 
 }
