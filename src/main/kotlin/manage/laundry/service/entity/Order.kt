@@ -26,8 +26,8 @@ data class Order(
 ) {
     enum class Status {
         PENDING,
-        PROCESSING,
         CONFIRMED,
+        PROCESSING,
         IN_PROGRESS,
         READY_FOR_DELIVERY,
         COMPLETED,

@@ -7,15 +7,9 @@ import manage.laundry.service.dto.request.CreateOrderRequest
 import manage.laundry.service.dto.request.CustomerLoginRequest
 import manage.laundry.service.dto.request.CustomerRegisterRequest
 import manage.laundry.service.dto.request.TrackOrderResponse
-import manage.laundry.service.dto.response.CreateOrderResponse
-import manage.laundry.service.dto.response.CustomerLoginResponse
-import manage.laundry.service.dto.response.RegisterCustomerResponse
-import manage.laundry.service.dto.response.ShopSearchResponse
+import manage.laundry.service.dto.response.*
 import manage.laundry.service.entity.User
-import manage.laundry.service.service.CustomerAuthService
-import manage.laundry.service.service.CustomerOrderService
-import manage.laundry.service.service.CustomerService
-import manage.laundry.service.service.UserService
+import manage.laundry.service.service.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -25,6 +19,7 @@ class CustomerController(
     private val customerService: CustomerService,
     private val customerAuthService: CustomerAuthService,
     private val customerOrderService: CustomerOrderService,
+    private val orderService: OrderService,
     private val userService: UserService,
     private val jwtUtil: JwtUtil
 ) {
@@ -97,6 +92,29 @@ class CustomerController(
         )
     }
 
+    @GetMapping("/orders")
+    fun getOrderHistory(
+        @RequestHeader("Authorization") authorizationHeader: String,
+    ): ResponseEntity<ApiResponse<List<OrderHistoryResponse>>> {
+
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        val role = jwtUtil.extractUserRole(token)
+
+        if (role != User.Role.CUSTOMER) {
+            throw Exception("Chỉ khách hàng mới có quyền xem lịch sử đơn hàng")
+        }
+
+        val customerId = jwtUtil.extractUserId(token)
+
+        val history = orderService.getOrderHistory(customerId)
+
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                data = history,
+                message = "Lấy lịch sử đơn hàng thành công"
+            )
+        )
+    }
 
 
 }

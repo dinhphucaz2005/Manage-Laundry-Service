@@ -42,5 +42,14 @@ class JwtUtil(
         return claims.subject.toInt()
     }
 
+    fun extractUserRole(token: String): User.Role {
+        val claims = Jwts.parserBuilder()
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .body
+
+        return User.Role.valueOf(claims["role"].toString())
+    }
 
 }
