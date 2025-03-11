@@ -41,7 +41,7 @@ class ShopController(
     fun addService(
         @PathVariable shopId: Int,
         @RequestBody @Valid request: CreateServiceRequest
-    ): ResponseEntity<ApiResponse<ShopServiceResponse>> {
+    ): ResponseEntity<ApiResponse<List<ShopServiceResponse>>> {
         val response = shopService.addServiceToShop(shopId, request)
         return ResponseEntity.ok(
             ApiResponse(

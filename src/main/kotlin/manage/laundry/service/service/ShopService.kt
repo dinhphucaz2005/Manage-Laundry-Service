@@ -75,19 +75,23 @@ class ShopService(
         )
         val savedStaffUser = userRepository.save(staffUser)
 
-        val staff = Staff(
-            user = savedStaffUser,
-            shop = shop
+        staffRepository.save(
+            Staff(
+                user = savedStaffUser,
+                shop = shop
+            )
         )
-        staffRepository.save(staff)
+
+        val staffs = staffRepository.findByShop(shop)
+            .map { staff -> UserResponse.fromEntity(staff.user) }
 
         return RegisterStaffResponse(
-            staff = UserResponse.fromEntity(savedStaffUser),
+            staffs = staffs,
             shop = ShopResponse.fromEntity(shop)
         )
     }
 
-    fun addServiceToShop(shopId: Int, request: CreateServiceRequest): ShopServiceResponse {
+    fun addServiceToShop(shopId: Int, request: CreateServiceRequest): List<ShopServiceResponse> {
         val shop = shopRepository.findById(shopId)
             .orElseThrow { Exception("Không tìm thấy tiệm với id = $shopId") }
 
@@ -97,15 +101,20 @@ class ShopService(
             description = request.description,
             price = request.price
         )
-        val savedService = shopServiceRepository.save(service)
+        shopServiceRepository.save(service)
 
-        return ShopServiceResponse(
-            id = savedService.id,
-            name = savedService.name,
-            description = savedService.description,
-            price = savedService.price,
-            shopId = shop.id
-        )
+        val services = shopServiceRepository.findByShop(shop)
+            .map { savedService ->
+                ShopServiceResponse(
+                    id = savedService.id,
+                    name = savedService.name,
+                    description = savedService.description,
+                    price = savedService.price,
+                    shopId = shop.id
+                )
+            }
+
+        return services
     }
 
 
