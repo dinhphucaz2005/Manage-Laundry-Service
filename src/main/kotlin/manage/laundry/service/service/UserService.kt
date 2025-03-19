@@ -2,6 +2,7 @@ package manage.laundry.service.service
 
 import manage.laundry.service.common.JwtUtil
 import manage.laundry.service.entity.User
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.UserRepository
 import org.springframework.stereotype.Service
 
@@ -13,7 +14,7 @@ class UserService(
 
     fun getUserById(userId: Int): User {
         return userRepository.findById(userId)
-            .orElseThrow { Exception("Người dùng không tồn tại") }
+            .orElseThrow { CustomException("Người dùng không tồn tại") }
     }
 
     fun authenticateCustomer(authorizationHeader: String): User {
@@ -22,7 +23,7 @@ class UserService(
         val user = getUserById(userId)
 
         if (user.role != User.Role.CUSTOMER) {
-            throw Exception("Chỉ khách hàng mới được thực hiện hành động này")
+            throw CustomException("Chỉ khách hàng mới được thực hiện hành động này")
         }
 
         return user
@@ -34,7 +35,7 @@ class UserService(
         val user = getUserById(userId)
 
         if (user.role != User.Role.OWNER) {
-            throw Exception("Chỉ chủ tiệm mới được thực hiện hành động này")
+            throw CustomException("Chỉ chủ tiệm mới được thực hiện hành động này")
         }
 
         return user

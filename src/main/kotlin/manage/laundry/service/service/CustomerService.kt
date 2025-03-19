@@ -6,6 +6,7 @@ import manage.laundry.service.dto.response.RegisterCustomerResponse
 import manage.laundry.service.dto.response.ShopSearchResponse
 import manage.laundry.service.entity.Customer
 import manage.laundry.service.entity.User
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.CustomerRepository
 import manage.laundry.service.repository.ShopRepository
 import manage.laundry.service.repository.UserRepository
@@ -21,7 +22,7 @@ class CustomerService(
 
     fun registerCustomer(request: CustomerRegisterRequest): RegisterCustomerResponse {
         if (userRepository.existsByEmail(request.email)) {
-            throw IllegalArgumentException("Email đã được sử dụng")
+            throw CustomException("Email đã được sử dụng")
         }
 
         val user = User(

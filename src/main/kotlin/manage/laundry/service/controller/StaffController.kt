@@ -8,6 +8,7 @@ import manage.laundry.service.dto.request.UpdateOrderStatusRequest
 import manage.laundry.service.dto.response.OrderResponse
 import manage.laundry.service.dto.response.StaffLoginResponse
 import manage.laundry.service.entity.User
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.service.OrderService
 import manage.laundry.service.service.StaffService
 import org.springframework.http.ResponseEntity
@@ -42,7 +43,7 @@ class StaffController(
         val role = jwtUtil.extractUserRole(token)
 
         if (role != User.Role.STAFF) {
-            throw Exception("Chỉ nhân viên mới được xem danh sách đơn hàng")
+            throw CustomException("Chỉ nhân viên mới được xem danh sách đơn hàng")
         }
 
         val id = jwtUtil.extractUserId(token)
@@ -68,7 +69,7 @@ class StaffController(
         val role = jwtUtil.extractUserRole(token)
 
         if (role != User.Role.STAFF) {
-            throw Exception("Chỉ nhân viên mới có quyền cập nhật trạng thái đơn hàng")
+            throw CustomException("Chỉ nhân viên mới có quyền cập nhật trạng thái đơn hàng")
         }
 
         val staffId = jwtUtil.extractUserId(token)

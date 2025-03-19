@@ -5,6 +5,7 @@ import manage.laundry.service.configuration.PasswordEncoder
 import manage.laundry.service.dto.request.CustomerLoginRequest
 import manage.laundry.service.dto.response.CustomerLoginResponse
 import manage.laundry.service.entity.User
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.UserRepository
 import org.springframework.stereotype.Service
 
@@ -17,14 +18,14 @@ class CustomerAuthService(
 
     fun login(request: CustomerLoginRequest): CustomerLoginResponse {
         val user = userRepository.findByEmail(request.email)
-            ?: throw Exception("Email không tồn tại")
+            ?: throw CustomException("Email không tồn tại")
 
         if (user.role != User.Role.CUSTOMER) {
-            throw Exception("Tài khoản không phải khách hàng")
+            throw CustomException("Tài khoản không phải khách hàng")
         }
 
         if (!passwordEncoder.matches(request.password, user.password)) {
-            throw Exception("Mật khẩu không đúng")
+            throw CustomException("Mật khẩu không đúng")
         }
 
         val token = jwtUtil.generateToken(user)

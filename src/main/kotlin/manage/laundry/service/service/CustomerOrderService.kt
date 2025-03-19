@@ -7,6 +7,7 @@ import manage.laundry.service.dto.request.UpdateOrderRequest
 import manage.laundry.service.dto.response.CreateOrderResponse
 import manage.laundry.service.entity.Order
 import manage.laundry.service.entity.OrderItem
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.*
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -22,10 +23,10 @@ class CustomerOrderService(
 
     fun createOrder(customerId: Int, request: CreateOrderRequest): CreateOrderResponse {
         val customer = userRepository.findById(customerId)
-            .orElseThrow { Exception("Khách hàng không tồn tại") }
+            .orElseThrow { CustomException("Khách hàng không tồn tại") }
 
         val shop = shopRepository.findById(request.shopId)
-            .orElseThrow { Exception("Tiệm không tồn tại") }
+            .orElseThrow { CustomException("Tiệm không tồn tại") }
 
         var totalPrice = BigDecimal.ZERO
 
@@ -40,10 +41,10 @@ class CustomerOrderService(
 
         request.items.forEach { item ->
             val service = shopServiceRepository.findById(item.serviceId)
-                .orElseThrow { Exception("Dịch vụ không tồn tại") }
+                .orElseThrow { CustomException("Dịch vụ không tồn tại") }
 
             if (service.shop.id != shop.id) {
-                throw Exception("Dịch vụ không thuộc tiệm này")
+                throw CustomException("Dịch vụ không thuộc tiệm này")
             }
 
             val itemPrice = service.price.multiply(BigDecimal.valueOf(item.quantity.toLong()))
@@ -72,10 +73,10 @@ class CustomerOrderService(
 
     fun trackOrder(orderId: Int, customerId: Int): TrackOrderResponse {
         val order = orderRepository.findById(orderId)
-            .orElseThrow { Exception("Đơn hàng không tồn tại") }
+            .orElseThrow { CustomException("Đơn hàng không tồn tại") }
 
         if (order.customer.id != customerId) {
-            throw Exception("Bạn không có quyền xem đơn hàng này")
+            throw CustomException("Bạn không có quyền xem đơn hàng này")
         }
 
         return TrackOrderResponse(
@@ -92,10 +93,10 @@ class CustomerOrderService(
     @Transactional
     fun updateOrderByOwner(orderId: Int, request: UpdateOrderRequest, ownerId: Int) {
         var order = orderRepository.findById(orderId)
-            .orElseThrow { Exception("Đơn hàng không tồn tại") }
+            .orElseThrow { CustomException("Đơn hàng không tồn tại") }
 
         if (order.shop.owner.id != ownerId) {
-            throw Exception("Bạn không có quyền cập nhật đơn hàng này")
+            throw CustomException("Bạn không có quyền cập nhật đơn hàng này")
         }
 
         order = order.copy(

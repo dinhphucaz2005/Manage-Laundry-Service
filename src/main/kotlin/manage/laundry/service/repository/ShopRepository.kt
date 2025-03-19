@@ -22,4 +22,7 @@ interface ShopRepository : JpaRepository<Shop, Int> {
         @Param("minRating") minRating: Double?
     ): List<Shop>
 
+
+    fun getShopsByOwnerId(ownerId: Int): List<Shop>
+
 }

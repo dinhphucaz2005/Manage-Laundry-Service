@@ -3,6 +3,7 @@ package manage.laundry.service.service
 import manage.laundry.service.dto.response.OrderHistoryResponse
 import manage.laundry.service.dto.response.OrderResponse
 import manage.laundry.service.entity.Order
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.OrderRepository
 import manage.laundry.service.repository.StaffRepository
 import org.springframework.stereotype.Service
@@ -39,18 +40,18 @@ class OrderService(
 
     fun updateOrderStatus(orderId: Int, status: String, staffId: Int) {
         var order = orderRepository.findById(orderId)
-            .orElseThrow { Exception("Đơn hàng không tồn tại") }
+            .orElseThrow { CustomException("Đơn hàng không tồn tại") }
 
         val validStatuses = Order.Status.entries.map { it.name }
         if (status !in validStatuses) {
-            throw Exception("Trạng thái không hợp lệ")
+            throw CustomException("Trạng thái không hợp lệ")
         }
 
         val staff = staffRepository.findByUserId(staffId)
-            ?: throw Exception("Nhân viên không tồn tại")
+            ?: throw CustomException("Nhân viên không tồn tại")
 
         if (order.shop.id != staff.shop.id) {
-            throw Exception("Bạn không có quyền cập nhật đơn hàng này")
+            throw CustomException("Bạn không có quyền cập nhật đơn hàng này")
         }
 
         order = order.copy(

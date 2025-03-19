@@ -1,5 +1,5 @@
 package manage.laundry.service.exception
 
-data class NotFoundException(
+data class CustomException(
     override val message: String,
-) : Exception()
+) : RuntimeException()

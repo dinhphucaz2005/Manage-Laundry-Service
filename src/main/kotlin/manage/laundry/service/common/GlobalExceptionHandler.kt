@@ -1,5 +1,6 @@
 package manage.laundry.service.common
 
+import manage.laundry.service.exception.CustomException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -16,6 +17,15 @@ class GlobalExceptionHandler {
         }
         return ResponseEntity(ApiResponse.error(message = message), HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(CustomException::class)
+    fun handleCustomException(ex: CustomException): ResponseEntity<ApiResponse<Nothing>> {
+        return ResponseEntity(
+            ApiResponse.error(message = ex.message),
+            HttpStatus.BAD_REQUEST
+        )
+    }
+
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ApiResponse<Nothing>> {

@@ -11,10 +11,9 @@ import manage.laundry.service.entity.Shop
 import manage.laundry.service.entity.ShopService
 import manage.laundry.service.entity.Staff
 import manage.laundry.service.entity.User
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.*
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
 
 
@@ -30,7 +29,7 @@ class ShopService(
 
     fun registerOwnerWithShop(request: ShopRegisterRequest): RegisterOwnerResponse {
         if (userRepository.existsByEmail(request.email)) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email đã được sử dụng")
+            throw CustomException("Email đã được sử dụng")
         }
 
         val owner = User(
@@ -57,13 +56,25 @@ class ShopService(
         )
     }
 
+    fun getStaffs(shopId: Int): GetStaffResponse {
+        val shop = shopRepository.findById(shopId).orElseThrow {
+            CustomException("Không tìm thấy tiệm")
+        }
+
+        val staffs = staffRepository.findByShop(shop)
+            .map { staff -> UserResponse.fromEntity(staff.user) }
+
+        return GetStaffResponse(staffs = staffs)
+    }
+
+
     fun addStaffToShop(shopId: Int, request: StaffRegisterRequest): RegisterStaffResponse {
         if (userRepository.existsByEmail(request.email)) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Email đã được sử dụng")
+            throw CustomException("Email đã được sử dụng")
         }
 
         val shop = shopRepository.findById(shopId).orElseThrow {
-            ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy tiệm")
+            CustomException("Không tìm thấy tiệm")
         }
 
         val staffUser = User(
@@ -91,9 +102,28 @@ class ShopService(
         )
     }
 
+    fun getServices(shopId: Int): List<ShopServiceResponse> {
+        val shop = shopRepository.findById(shopId)
+            .orElseThrow { CustomException("Không tìm thấy tiệm với id = $shopId") }
+
+        val services = shopServiceRepository.findByShop(shop)
+            .map { savedService ->
+                ShopServiceResponse(
+                    id = savedService.id,
+                    name = savedService.name,
+                    description = savedService.description,
+                    price = savedService.price,
+                    shopId = shop.id
+                )
+            }
+
+        return services
+    }
+
+
     fun addServiceToShop(shopId: Int, request: CreateServiceRequest): List<ShopServiceResponse> {
         val shop = shopRepository.findById(shopId)
-            .orElseThrow { Exception("Không tìm thấy tiệm với id = $shopId") }
+            .orElseThrow { CustomException("Không tìm thấy tiệm với id = $shopId") }
 
         val service = ShopService(
             shop = shop,
@@ -121,7 +151,7 @@ class ShopService(
     @Transactional
     fun updateService(serviceId: Int, request: UpdateServiceRequest) {
         val service = shopServiceRepository.findById(serviceId)
-            .orElseThrow { Exception("Không tìm thấy dịch vụ với ID: $serviceId") }
+            .orElseThrow { CustomException("Không tìm thấy dịch vụ với ID: $serviceId") }
 
         val updatedService = service.copy(
             name = request.name,
@@ -135,16 +165,16 @@ class ShopService(
 
     fun deleteService(serviceId: Int) {
         val service = shopServiceRepository.findById(serviceId)
-            .orElseThrow { Exception("Dịch vụ không tồn tại") }
+            .orElseThrow { CustomException("Dịch vụ không tồn tại") }
         shopServiceRepository.delete(service)
     }
 
     fun getShopOrders(shopId: Int, ownerId: Int): List<ShopOrderResponse> {
         val shop = shopRepository.findById(shopId)
-            .orElseThrow { Exception("Tiệm không tồn tại") }
+            .orElseThrow { CustomException("Tiệm không tồn tại") }
 
         if (shop.owner.id != ownerId) {
-            throw Exception("Bạn không có quyền xem đơn hàng của tiệm này")
+            throw CustomException("Bạn không có quyền xem đơn hàng của tiệm này")
         }
 
         val orders = orderRepository.findByShop(shop)
@@ -159,5 +189,6 @@ class ShopService(
             )
         }
     }
+
 
 }

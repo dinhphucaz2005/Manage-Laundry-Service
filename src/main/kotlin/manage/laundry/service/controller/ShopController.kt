@@ -26,6 +26,15 @@ class ShopController(
         return ResponseEntity.ok(ApiResponse.success(result, "Đăng ký chủ tiệm và tạo hồ sơ tiệm thành công"))
     }
 
+    @GetMapping("/shops/{shopId}/staffs")
+    fun getStaffs(
+        @PathVariable shopId: Int
+    ): ResponseEntity<ApiResponse<GetStaffResponse>> {
+        val response = shopService.getStaffs(shopId)
+        return ResponseEntity.ok(ApiResponse.success(response, "Lấy danh sách nhân viên thành công"))
+    }
+
+
     @PostMapping("/shops/{shopId}/staffs")
     fun addStaff(
         @PathVariable shopId: Int,
@@ -36,6 +45,19 @@ class ShopController(
             ApiResponse.success(response, "Thêm nhân viên vào tiệm thành công")
         )
     }
+
+    @GetMapping("/shops/{shopId}/services")
+    fun getService(@PathVariable shopId: Int): ResponseEntity<ApiResponse<List<ShopServiceResponse>>> {
+        val response = shopService.getServices(shopId)
+        return ResponseEntity.ok(
+            ApiResponse(
+                success = true,
+                message = "Lấy danh sách dịch vụ thành công",
+                data = response
+            )
+        )
+    }
+
 
     @PostMapping("/shops/{shopId}/services")
     fun addService(

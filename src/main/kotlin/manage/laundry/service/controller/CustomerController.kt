@@ -9,6 +9,7 @@ import manage.laundry.service.dto.request.CustomerRegisterRequest
 import manage.laundry.service.dto.request.TrackOrderResponse
 import manage.laundry.service.dto.response.*
 import manage.laundry.service.entity.User
+import manage.laundry.service.exception.CustomException
 import manage.laundry.service.service.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -68,7 +69,7 @@ class CustomerController(
         val user = userService.getUserById(userId)
 
         if (user.role != User.Role.CUSTOMER) {
-            throw Exception("Chỉ khách hàng mới được đặt đơn")
+            throw CustomException("Chỉ khách hàng mới được đặt đơn")
         }
 
         val response = customerOrderService.createOrder(user.id, request)
@@ -101,7 +102,7 @@ class CustomerController(
         val role = jwtUtil.extractUserRole(token)
 
         if (role != User.Role.CUSTOMER) {
-            throw Exception("Chỉ khách hàng mới có quyền xem lịch sử đơn hàng")
+            throw CustomException("Chỉ khách hàng mới có quyền xem lịch sử đơn hàng")
         }
 
         val customerId = jwtUtil.extractUserId(token)
