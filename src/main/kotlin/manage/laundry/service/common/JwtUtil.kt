@@ -20,7 +20,7 @@ class JwtUtil(
 
     fun generateToken(user: User): String {
         val now = Date()
-        val expiryDate = Date(now.time + expirationTime)
+        val expiryDate = Date(now.time + expirationTime * 1000)
 
         return Jwts.builder()
             .setSubject(user.id.toString())
