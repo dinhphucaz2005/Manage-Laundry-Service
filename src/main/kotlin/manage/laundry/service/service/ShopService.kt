@@ -190,5 +190,17 @@ class ShopService(
         }
     }
 
+    fun getShopDetail(shopId: Int): ShopDetailResponse? {
+        val shop = shopRepository.findById(shopId)
+            .orElseThrow { CustomException("Tiệm này không tồn tại") }
+            ?: throw CustomException("Tiệm này không tồn tại")
+
+
+        val services = shopServiceRepository.findByShop(shop)
+
+
+        return ShopDetailResponse.mapper(shop, services)
+    }
+
 
 }
