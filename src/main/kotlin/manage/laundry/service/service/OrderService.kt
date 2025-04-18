@@ -20,7 +20,8 @@ class OrderService(
 
         val excludedStatuses = listOf(
             Order.Status.COMPLETED,
-            Order.Status.CANCELLED
+            Order.Status.CANCELED,
+            Order.Status.DELIVERED,
         )
 
         val orders = orderRepository.findAllActiveOrdersByStaffId(staffId, excludedStatuses)

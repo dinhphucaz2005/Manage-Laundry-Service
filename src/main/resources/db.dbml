@@ -1,24 +1,25 @@
 Table users {
   id int [pk]
-  name varchar
-  email varchar [unique]
-  password varchar
-  phone varchar
-  role varchar // 'owner', 'staff', 'customer', 'admin'
+  name varchar [not null]
+  email varchar [unique, not null]
+  password varchar [not null]
+  phone varchar [not null]
+  role varchar [not null] // 'OWNER', 'STAFF', 'CUSTOMER', 'SYSTEM_ADMIN'
   created_at timestamp
   updated_at timestamp
 }
 
 Table shops {
   id int [pk]
-  owner_id int [ref: > users.id]
-  name varchar
-  location varchar
+  owner_id int [ref: > users.id, not null]
+  name varchar [not null]
+  location varchar [not null]
   description text
-  open_time time
-  close_time time
+  open_time time [not null]
+  close_time time [not null]
   created_at timestamp
   updated_at timestamp
+  average_rating decimal [default: 5.0]
 }
 
 Table services {
@@ -35,7 +36,22 @@ Table staffs {
   id int [pk]
   user_id int [ref: > users.id]
   shop_id int [ref: > shops.id]
-  position varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table staff_requests {
+  id int [pk]
+  user_id int [ref: > users.id, not null]
+  shop_id int [ref: > shops.id, not null]
+  status varchar [not null] // 'PENDING', 'ACCEPTED', 'REJECTED'
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table customers {
+  id int [pk]
+  user_id int [ref: - users.id, not null]
   created_at timestamp
   updated_at timestamp
 }
@@ -45,7 +61,7 @@ Table orders {
   customer_id int [ref: > users.id]
   shop_id int [ref: > shops.id]
   total_price decimal
-  status varchar // 'pending', 'processing', 'completed', 'cancelled'
+  status varchar // 'NEW', 'PENDING', 'CANCELED', 'PROCESSING', 'COMPLETED', 'DELIVERED', 'PAID', 'PAID_FAILED'
   special_instructions text
   created_at timestamp
   updated_at timestamp
@@ -61,7 +77,7 @@ Table order_items {
 
 Table payments {
   id int [pk]
-  order_id int [ref: > orders.id]
+  order_id int [ref: - orders.id]
   amount decimal
   payment_method varchar
   paid_at timestamp
@@ -69,9 +85,9 @@ Table payments {
 
 Table reviews {
   id int [pk]
-  order_id int [ref: > orders.id]
+  order_id int [ref: - orders.id]
   customer_id int [ref: > users.id]
-  rating int // 1-10 sao
+  rating int // 1-10 stars
   comment text
   created_at timestamp
 }

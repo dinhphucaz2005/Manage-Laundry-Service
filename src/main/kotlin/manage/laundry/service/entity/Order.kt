@@ -16,7 +16,7 @@ data class Order(
     @Column(name = "total_price")
     val totalPrice: BigDecimal,
     @Enumerated(EnumType.STRING)
-    val status: Status = Status.PENDING,
+    val status: Status = Status.NEW,
     @Column(name = "special_instructions")
     val specialInstructions: String? = null,
     @Column(name = "created_at")
@@ -25,12 +25,13 @@ data class Order(
     val updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
     enum class Status {
-        PENDING,
-        CONFIRMED,
-        PROCESSING,
-        IN_PROGRESS,
-        READY_FOR_DELIVERY,
-        COMPLETED,
-        CANCELLED
+        NEW, /*Khách vừa gửi đồ, chưa tính toán chi phí*/
+        PENDING, /*Đã báo giá cho khách, đang chờ khách đồng ý*/
+        CANCELED, /*Khách không đồng ý giá và hủy đơn*/
+        PROCESSING, /*Khách đã đồng ý, đơn hàng đang được giặt ủi*/
+        COMPLETED, /*Đồ đã giặt xong, sẵn sàng trả khách*/
+        DELIVERED, /*Khách đã nhận đồ nhưng chưa thanh toán*/
+        PAID, /*Khách đã trả tiền (tiền mặt/chuyển khoản/thẻ)*/
+        PAID_FAILED /*Giao dịch thanh toán thất bại (thẻ/ví điện tử)*/
     }
 }
