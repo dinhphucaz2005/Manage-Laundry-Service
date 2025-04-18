@@ -1,0 +1,34 @@
+Mã,Nhóm,Chức năng,Method,URL,Mô tả,Trạng thái
+SO1,Shop Owner,Đăng ký và tạo hồ sơ tiệm,POST,/owners/register,Đăng ký tài khoản chủ tiệm và tạo hồ sơ tiệm,DONE
+SO2,Shop Owner,Thêm nhân viên,POST,/owners/shops/{shopId}/staffs,Thêm nhân viên vào tiệm,DONE
+SO3,Shop Owner,Quản lý dịch vụ và giá,POST,/owners/shops/{shopId}/services,Thêm dịch vụ mới vào tiệm,DONE
+SO3,Shop Owner,Cập nhật dịch vụ,PUT,/owners/services/{serviceId},Cập nhật thông tin dịch vụ,DONE
+SO3,Shop Owner,Xóa dịch vụ,DELETE,/owners/services/{serviceId},Xóa dịch vụ khỏi tiệm,DONE
+SO4,Shop Owner,Xem đơn hàng,GET,/owners/shops/{shopId}/orders,Xem danh sách đơn hàng của tiệm,DONE
+SO4,Shop Owner,Cập nhật đơn hàng,PUT,/owners/orders/{orderId},"Cập nhật thông tin đơn hàng (ghi chú, trạng thái)",TODO
+SO5,Shop Owner,"Xem doanh thu, báo cáo",GET,/owners/shops/{shopId}/revenues,Xem báo cáo doanh thu của tiệm,TODO
+ST1,Staff,Đăng nhập và xem công việc,POST,/staff/login,Đăng nhập tài khoản nhân viên,DONE
+ST1,Staff,Danh sách đơn hàng,GET,/staff/orders,Xem danh sách đơn hàng được giao,DONE
+ST2,Staff,Cập nhật trạng thái đơn hàng,PUT,/staff/orders/{orderId}/status,Cập nhật trạng thái đơn hàng,DONE
+ST3,Staff,Thông báo khách hàng,POST,/staff/orders/{orderId}/notify,Gửi thông báo cho khách về đơn hàng,TODO
+ST4,Staff,Gửi thông báo hệ thống,POST,/staff/system/notifications,"Gửi thông báo bảo trì, cập nhật (nếu được phân quyền)",TODO
+CU1,Customer,Tìm kiếm tiệm giặt,GET,/customers/shops,"Tìm kiếm tiệm theo vị trí, đánh giá, dịch vụ",DONE
+CU2,Customer,Đăng ký tài khoản,POST,/customers/register,Đăng ký tài khoản khách hàng,DONE
+CU2,Customer,Đăng nhập,POST,/customers/login,Đăng nhập tài khoản khách hàng,DONE
+CU2,Customer,Đặt đơn giặt,POST,/customers/orders,"Tạo đơn giặt mới
+Các trạng thái:
+PENDING: Chờ xác nhận
+CONFIRMED: Đã xác nhận)
+IN_PROGRESS: Đang xử lý (giặt, sấy,...)
+READY_FOR_DELIVERY:  sàng giao/trả
+COMPLETED: Hoàn thành đơn
+CANCELLED: Đã hủy",DONE
+CU3,Customer,Theo dõi đơn hàng,GET,/customers/orders/{orderId}/track,Theo dõi tiến trình xử lý đơn hàng,DONE
+CU4,Customer,Lịch sử giao dịch,GET,/customers/orders,Xem lịch sử đơn hàng đã đặt,DONE
+CU4,Customer,Tải hóa đơn,GET,/customers/receipts/{orderId},Tải hóa đơn đơn hàng,TODO
+CU5,Customer,Đánh giá tiệm giặt,POST,/customers/orders/{orderId}/review,Gửi đánh giá về đơn hàng và tiệm giặt,TODO
+SA1,System Admin,Xác minh chủ tiệm,PUT,/admin/owners/{ownerId}/verify,Xác nhận thông tin chủ tiệm,DONE
+SA2,System Admin,Giám sát hệ thống,GET,/admin/system/monitoring,Lấy thông tin giám sát hệ thống,DONE
+SA3,System Admin,Quản lý bảo mật,PUT,/admin/system/security,Cập nhật cấu hình bảo mật hệ thống,DONE
+SA4,System Admin,Thống kê hệ thống,GET,/admin/system/statistics,Lấy báo cáo tổng hợp hoạt động của nền tảng,DONE
+SA5,System Admin,Thông báo hệ thống,POST,/admin/system/notifications,Gửi thông báo chung toàn hệ thống,DONE

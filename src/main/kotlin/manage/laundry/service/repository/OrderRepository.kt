@@ -23,6 +23,13 @@ interface OrderRepository : JpaRepository<Order, Int> {
         excludedStatuses: List<Order.Status>
     ): List<Order>
 
+    @Query(
+        """
+    SELECT o FROM Order o
+    WHERE o.customer.id = :customerId
+    ORDER BY o.createdAt DESC
+    """
+    )
     fun findAllByCustomerId(customerId: Int): List<Order>
 
 }

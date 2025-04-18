@@ -26,6 +26,14 @@ class ShopController(
         return ResponseEntity.ok(ApiResponse.success(result, "Đăng ký chủ tiệm và tạo hồ sơ tiệm thành công"))
     }
 
+    @GetMapping("/shops/{shopId}")
+    fun getShop(
+        @PathVariable shopId: Int
+    ): ResponseEntity<ApiResponse<ShopDetailResponse>> {
+        val response = shopService.getShopDetail(shopId)
+        return ResponseEntity.ok(ApiResponse.success(response, "Lấy thông tin tiệm thành công"))
+    }
+
     @GetMapping("/shops/{shopId}/staffs")
     fun getStaffs(
         @PathVariable shopId: Int
@@ -136,7 +144,7 @@ class ShopController(
         customerOrderService.updateOrderByOwner(orderId, request, user.id)
 
         return ResponseEntity.ok(
-            ApiResponse.success(message = "Cập nhật đơn hàng thành công")
+            ApiResponse.success(message = "Cập next đơn hàng thành công")
         )
     }
 }

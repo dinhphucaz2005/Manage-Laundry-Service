@@ -9,3 +9,10 @@ data class ShopServiceResponse(
     val price: BigDecimal,
     val shopId: Int
 )
+
+data class ShopDetailServiceResponse(
+    val id: Int,
+    val name: String,
+    val description: String,
+    val price: BigDecimal,
+)
