@@ -3,7 +3,6 @@ package manage.laundry.service.dto.request
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
-import java.math.BigDecimal
 
 data class CreateServiceRequest(
     @field:NotBlank(message = "Tên dịch vụ không được để trống")
@@ -14,5 +13,5 @@ data class CreateServiceRequest(
 
     @field:NotNull(message = "Giá dịch vụ không được để trống")
     @field:Positive(message = "Giá dịch vụ phải lớn hơn 0")
-    val price: BigDecimal
+    val price: Int
 )

@@ -6,7 +6,6 @@ import manage.laundry.service.common.JwtUtil
 import manage.laundry.service.dto.request.CreateOrderRequest
 import manage.laundry.service.dto.request.CustomerLoginRequest
 import manage.laundry.service.dto.request.CustomerRegisterRequest
-import manage.laundry.service.dto.request.TrackOrderResponse
 import manage.laundry.service.dto.response.*
 import manage.laundry.service.entity.User
 import manage.laundry.service.exception.CustomException
@@ -80,7 +79,7 @@ class CustomerController(
     fun trackOrder(
         @PathVariable orderId: Int,
         @RequestHeader("Authorization") authorizationHeader: String,
-    ): ResponseEntity<ApiResponse<TrackOrderResponse>> {
+    ): ResponseEntity<ApiResponse<OrderResponse>> {
 
         val user = userService.authenticateCustomer(authorizationHeader)
 
@@ -96,7 +95,7 @@ class CustomerController(
     @GetMapping("/orders")
     fun getOrderHistory(
         @RequestHeader("Authorization") authorizationHeader: String,
-    ): ResponseEntity<ApiResponse<List<OrderHistoryResponse>>> {
+    ): ResponseEntity<ApiResponse<List<OrderResponse>>> {
 
         val token = authorizationHeader.removePrefix("Bearer ").trim()
         val role = jwtUtil.extractUserRole(token)

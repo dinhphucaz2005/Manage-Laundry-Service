@@ -1,7 +1,6 @@
 package manage.laundry.service.entity
 
 import jakarta.persistence.*
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
@@ -11,7 +10,7 @@ data class Payment(
     val id: Int = 0,
     @OneToOne @JoinColumn(name = "order_id")
     val order: Order,
-    val amount: BigDecimal,
+    val amount: Int,
     @Column(name = "payment_method")
     val paymentMethod: String,
     @Column(name = "paid_at")

@@ -183,6 +183,7 @@ class ShopService(
             ShopOrderResponse(
                 orderId = order.id,
                 customerName = order.customer.name,
+                estimatePrice = order.estimatePrice,
                 totalPrice = order.totalPrice,
                 status = order.status,
                 createdAt = order.createdAt

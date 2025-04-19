@@ -2,15 +2,14 @@ package manage.laundry.service.service
 
 import jakarta.transaction.Transactional
 import manage.laundry.service.dto.request.CreateOrderRequest
-import manage.laundry.service.dto.request.TrackOrderResponse
 import manage.laundry.service.dto.request.UpdateOrderRequest
 import manage.laundry.service.dto.response.CreateOrderResponse
+import manage.laundry.service.dto.response.OrderResponse
 import manage.laundry.service.entity.Order
 import manage.laundry.service.entity.OrderItem
 import manage.laundry.service.exception.CustomException
 import manage.laundry.service.repository.*
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class CustomerOrderService(
@@ -28,14 +27,18 @@ class CustomerOrderService(
         val shop = shopRepository.findById(request.shopId)
             .orElseThrow { CustomException("Tiệm không tồn tại") }
 
-        var totalPrice = BigDecimal.ZERO
+
+        val shopServices = shopServiceRepository.findByShop(shop)
+        var estimatePrice = 0
+
 
         val order = orderRepository.save(
             Order(
                 customer = customer,
                 shop = shop,
                 specialInstructions = request.specialInstructions,
-                totalPrice = BigDecimal.ZERO // tạm, lát cập nhật lại
+                estimatePrice = request.estimatePrice(shopServices),
+                status = Order.Status.NEW,
             )
         )
 
@@ -47,8 +50,8 @@ class CustomerOrderService(
                 throw CustomException("Dịch vụ không thuộc tiệm này")
             }
 
-            val itemPrice = service.price.multiply(BigDecimal.valueOf(item.quantity.toLong()))
-            totalPrice += itemPrice
+            val itemPrice = service.price * item.quantity
+            estimatePrice += itemPrice
 
             orderItemRepository.save(
                 OrderItem(
@@ -60,18 +63,18 @@ class CustomerOrderService(
             )
         }
 
-        orderRepository.save(order.copy(totalPrice = totalPrice))
+        orderRepository.save(order.copy(totalPrice = estimatePrice))
 
         return CreateOrderResponse(
             orderId = order.id,
-            totalPrice = totalPrice,
+            estimatePrice = estimatePrice,
             status = order.status.name,
             createdAt = order.createdAt
         )
     }
 
 
-    fun trackOrder(orderId: Int, customerId: Int): TrackOrderResponse {
+    fun trackOrder(orderId: Int, customerId: Int): OrderResponse {
         val order = orderRepository.findById(orderId)
             .orElseThrow { CustomException("Đơn hàng không tồn tại") }
 
@@ -79,14 +82,28 @@ class CustomerOrderService(
             throw CustomException("Bạn không có quyền xem đơn hàng này")
         }
 
-        return TrackOrderResponse(
-            orderId = order.id,
+        val customer = userRepository.findById(customerId)
+            .orElseThrow { CustomException("Khách hàng không tồn tại") }
+
+        return OrderResponse(
+            id = order.id,
             shopName = order.shop.name,
             status = order.status,
             totalPrice = order.totalPrice,
             specialInstructions = order.specialInstructions,
+            estimatePrice = order.estimatePrice,
             createdAt = order.createdAt,
-            updatedAt = order.updatedAt
+            items = orderItemRepository.findAllByOrderIdIn(orderId).map {
+                OrderResponse.OrderItemResponse(
+                    id = it.id,
+                    name = it.shopService.name,
+                    quantity = it.quantity,
+                    price = it.price,
+                    totalPrice = it.price * it.quantity
+                )
+            },
+            customerName = customer.name,
+            updateAt = order.updatedAt,
         )
     }
 

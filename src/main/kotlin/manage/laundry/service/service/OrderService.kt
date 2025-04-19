@@ -1,18 +1,19 @@
 package manage.laundry.service.service
 
-import manage.laundry.service.dto.response.OrderHistoryResponse
 import manage.laundry.service.dto.response.OrderResponse
 import manage.laundry.service.entity.Order
 import manage.laundry.service.exception.CustomException
-import manage.laundry.service.repository.OrderRepository
-import manage.laundry.service.repository.StaffRepository
+import manage.laundry.service.repository.*
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class OrderService(
     private val orderRepository: OrderRepository,
-    private val staffRepository: StaffRepository
+    private val staffRepository: StaffRepository,
+    private val orderItemRepository: OrderItemRepository,
+    private val customerRepository: CustomerRepository,
+    private val userRepository: UserRepository,
 ) {
 
 
@@ -31,10 +32,21 @@ class OrderService(
                 id = it.id,
                 shopName = it.shop.name,
                 customerName = it.customer.name,
+                estimatePrice = it.estimatePrice,
                 totalPrice = it.totalPrice,
                 status = it.status,
                 specialInstructions = it.specialInstructions,
-                createdAt = it.createdAt
+                createdAt = it.createdAt,
+                items = orderItemRepository.findAllByOrderIdIn(it.id).map { item ->
+                    OrderResponse.OrderItemResponse(
+                        id = item.id,
+                        name = item.shopService.name,
+                        quantity = item.quantity,
+                        price = item.price,
+                        totalPrice = item.price * item.quantity
+                    )
+                },
+                updateAt = it.updatedAt,
             )
         }
     }
@@ -62,17 +74,32 @@ class OrderService(
         orderRepository.save(order)
     }
 
-    fun getOrderHistory(customerId: Int): List<OrderHistoryResponse> {
+    fun getOrderHistory(customerId: Int): List<OrderResponse> {
+        val customer = userRepository.findById(customerId)
+            .orElseThrow { CustomException("Khách hàng không tồn tại") }
+
         val orders = orderRepository.findAllByCustomerId(customerId)
 
         return orders.map {
-            OrderHistoryResponse(
-                orderId = it.id,
+            OrderResponse(
+                id = it.id,
                 shopName = it.shop.name,
                 totalPrice = it.totalPrice,
-                status = it.status.name,
+                status = it.status,
                 createdAt = it.createdAt,
-                updatedAt = it.updatedAt
+                customerName = customer.name,
+                estimatePrice = it.estimatePrice,
+                specialInstructions = it.specialInstructions,
+                updateAt = it.updatedAt,
+                items = orderItemRepository.findAllByOrderIdIn(it.id).map { item ->
+                    OrderResponse.OrderItemResponse(
+                        id = item.id,
+                        name = item.shopService.name,
+                        quantity = item.quantity,
+                        price = item.price,
+                        totalPrice = item.price * item.quantity
+                    )
+                }
             )
         }
     }

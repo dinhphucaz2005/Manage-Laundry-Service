@@ -3,7 +3,6 @@ package manage.laundry.service.dto.request
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import java.math.BigDecimal
 
 data class UpdateServiceRequest(
     @field:NotBlank(message = "Tên dịch vụ không được để trống")
@@ -14,5 +13,5 @@ data class UpdateServiceRequest(
     val description: String,
 
     @field:Min(value = 1000, message = "Giá dịch vụ phải lớn hơn 1000")
-    val price: BigDecimal
+    val price: Int
 )

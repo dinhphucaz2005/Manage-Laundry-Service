@@ -1,7 +1,6 @@
 package manage.laundry.service.entity
 
 import jakarta.persistence.*
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
@@ -13,8 +12,10 @@ data class Order(
     val customer: User,
     @ManyToOne @JoinColumn(name = "shop_id")
     val shop: Shop,
+    @Column(name = "estimate_price")
+    val estimatePrice: Int,
     @Column(name = "total_price")
-    val totalPrice: BigDecimal,
+    val totalPrice: Int? = null,
     @Enumerated(EnumType.STRING)
     val status: Status = Status.NEW,
     @Column(name = "special_instructions")
