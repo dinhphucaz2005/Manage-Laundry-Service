@@ -3,6 +3,8 @@ package manage.laundry.service.controller
 import jakarta.validation.Valid
 import manage.laundry.service.common.ApiResponse
 import manage.laundry.service.common.JwtUtil
+import manage.laundry.service.dto.request.CancelOrderRequest
+import manage.laundry.service.dto.request.ConfirmOrderRequest
 import manage.laundry.service.dto.request.StaffLoginRequest
 import manage.laundry.service.dto.request.UpdateOrderStatusRequest
 import manage.laundry.service.dto.response.OrderResponse
@@ -80,5 +82,48 @@ class StaffController(
             ApiResponse.success(message = "Cập nhật trạng thái đơn hàng thành công")
         )
     }
+
+    @PutMapping("/orders/{orderId}/confirm")
+    fun confirmOrder(
+        @PathVariable orderId: Int,
+        @RequestHeader("Authorization") authorizationHeader: String,
+        @RequestBody request: ConfirmOrderRequest,
+    ): ResponseEntity<ApiResponse<String>> {
+
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        val role = jwtUtil.extractUserRole(token)
+
+        if (role != User.Role.STAFF) {
+            throw CustomException("Chỉ nhân viên mới có quyền xác nhận đơn hàng")
+        }
+
+        val staffId = jwtUtil.extractUserId(token)
+
+        orderService.updateOrder(orderId, staffId, request)
+
+        return ResponseEntity.ok(ApiResponse.success(message = "Xác nhận đơn hàng thành công"))
+    }
+
+    @PutMapping("/orders/{orderId}/cancel")
+    fun cancelOrder(
+        @PathVariable orderId: Int,
+        @RequestHeader("Authorization") authorizationHeader: String,
+        @RequestBody request: CancelOrderRequest,
+    ): ResponseEntity<ApiResponse<String>> {
+
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        val role = jwtUtil.extractUserRole(token)
+
+        if (role != User.Role.STAFF) {
+            throw CustomException("Chỉ nhân viên mới có quyền hủy đơn hàng")
+        }
+
+        val staffId = jwtUtil.extractUserId(token)
+
+        orderService.cancelOrder(orderId, staffId, request)
+
+        return ResponseEntity.ok(ApiResponse.success(message = "Hủy đơn hàng thành công"))
+    }
+
 
 }

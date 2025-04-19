@@ -116,5 +116,29 @@ class CustomerController(
         )
     }
 
+    @PutMapping("/orders/{orderId}/confirm")
+    fun confirmOrder(
+        @PathVariable orderId: Int,
+        @RequestHeader("Authorization") authorizationHeader: String,
+    ): ResponseEntity<ApiResponse<Nothing>> {
 
+        val user = userService.authenticateCustomer(authorizationHeader)
+
+        customerOrderService.confirmOrder(orderId, user.id)
+
+        return ResponseEntity.ok(ApiResponse.success(message = "Xác nhận đơn hàng thành công"))
+    }
+
+    @PutMapping("/orders/{orderId}/cancel")
+    fun cancelOrder(
+        @PathVariable orderId: Int,
+        @RequestHeader("Authorization") authorizationHeader: String,
+    ): ResponseEntity<ApiResponse<Nothing>> {
+
+        val user = userService.authenticateCustomer(authorizationHeader)
+
+        customerOrderService.cancelOrder(orderId, user.id)
+
+        return ResponseEntity.ok(ApiResponse.success(message = "Hủy đơn hàng thành công"))
+    }
 }

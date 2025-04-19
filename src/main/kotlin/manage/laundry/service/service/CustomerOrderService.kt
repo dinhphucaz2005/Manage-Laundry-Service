@@ -124,4 +124,56 @@ class CustomerOrderService(
         orderRepository.save(order)
     }
 
+
+    fun cancelOrder(orderId: Int, userId: Int): OrderResponse {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { CustomException("Đơn hàng không tồn tại") }
+
+        if (order.customer.id != userId) {
+            throw CustomException("Bạn không có quyền hủy đơn hàng này")
+        }
+        if (order.status != Order.Status.PENDING && order.status != Order.Status.NEW) {
+            throw CustomException("Đơn hàng không thể hủy")
+        }
+        val updatedOrder = order.copy(
+            status = Order.Status.CANCELED,
+            totalPrice = 0
+        )
+        orderRepository.save(updatedOrder)
+        return OrderResponse(
+            id = updatedOrder.id,
+            shopName = updatedOrder.shop.name,
+            status = updatedOrder.status,
+            totalPrice = updatedOrder.totalPrice,
+            specialInstructions = updatedOrder.specialInstructions,
+            estimatePrice = updatedOrder.estimatePrice,
+            createdAt = updatedOrder.createdAt,
+            items = orderItemRepository.findAllByOrderIdIn(orderId).map {
+                OrderResponse.OrderItemResponse(
+                    id = it.id,
+                    name = it.shopService.name,
+                    quantity = it.quantity,
+                    price = it.price,
+                    totalPrice = it.price * it.quantity
+                )
+            },
+            customerName = order.customer.name,
+            updateAt = updatedOrder.updatedAt,
+        )
+    }
+
+    fun confirmOrder(orderId: Int, userId: Int) {
+        val order = orderRepository.findById(orderId)
+            .orElseThrow { CustomException("Đơn hàng không tồn tại") }
+
+        if (order.customer.id != userId) {
+            throw CustomException("Bạn không có quyền xác nhận đơn hàng này")
+        }
+        if (order.status != Order.Status.PENDING) {
+            throw CustomException("Đơn hàng không thể xác nhận")
+        }
+
+        orderRepository.save(order.copy(status = Order.Status.PROCESSING))
+    }
+
 }

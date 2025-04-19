@@ -12,6 +12,8 @@ data class Order(
     val customer: User,
     @ManyToOne @JoinColumn(name = "shop_id")
     val shop: Shop,
+    @Column(columnDefinition = "text", name = "staff_response")
+    val staffResponse: String? = null,
     @Column(name = "estimate_price")
     val estimatePrice: Int,
     @Column(name = "total_price")
