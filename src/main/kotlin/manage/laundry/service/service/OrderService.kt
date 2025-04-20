@@ -14,10 +14,38 @@ class OrderService(
     private val orderRepository: OrderRepository,
     private val staffRepository: StaffRepository,
     private val orderItemRepository: OrderItemRepository,
-    private val customerRepository: CustomerRepository,
     private val userRepository: UserRepository,
 ) {
 
+    fun getOrdersByStatus(status: Order.Status, staffId: Int): List<OrderResponse> {
+        val staff = staffRepository.findByUserId(staffId)
+            ?: throw CustomException("Nhân viên không tồn tại")
+
+        val orders = orderRepository.findAllByStatusAndShopId(status, staff.shop.id)
+        println(orders)
+        return orders.map {
+            OrderResponse(
+                id = it.id,
+                shopName = it.shop.name,
+                customerName = it.customer.name,
+                estimatePrice = it.estimatePrice,
+                totalPrice = it.totalPrice,
+                status = it.status,
+                specialInstructions = it.specialInstructions,
+                createdAt = it.createdAt,
+                items = orderItemRepository.findAllByOrderIdIn(it.id).map { item ->
+                    OrderResponse.OrderItemResponse(
+                        id = item.id,
+                        name = item.shopService.name,
+                        quantity = item.quantity,
+                        price = item.price,
+                        totalPrice = item.price * item.quantity
+                    )
+                },
+                updateAt = it.updatedAt,
+            )
+        }
+    }
 
     fun getActiveOrdersAssignedToStaff(staffId: Int): List<OrderResponse> {
 
@@ -25,6 +53,8 @@ class OrderService(
             Order.Status.COMPLETED,
             Order.Status.CANCELED,
             Order.Status.DELIVERED,
+            Order.Status.PAID,
+            Order.Status.PAID_FAILED,
         )
 
         val orders = orderRepository.findAllActiveOrdersByStaffId(staffId, excludedStatuses)
@@ -181,6 +211,36 @@ class OrderService(
                 staffResponse = request.reason
             )
         )
+    }
+
+    fun getOrdersForStaff(id: Int): List<OrderResponse>? {
+        val staff = staffRepository.findByUserId(id)
+            ?: throw CustomException("Nhân viên không tồn tại")
+
+        val orders = orderRepository.getOrderForStaff(staff.shop.id)
+
+        return orders.map {
+            OrderResponse(
+                id = it.id,
+                shopName = it.shop.name,
+                customerName = it.customer.name,
+                estimatePrice = it.estimatePrice,
+                totalPrice = it.totalPrice,
+                status = it.status,
+                specialInstructions = it.specialInstructions,
+                createdAt = it.createdAt,
+                items = orderItemRepository.findAllByOrderIdIn(it.id).map { item ->
+                    OrderResponse.OrderItemResponse(
+                        id = item.id,
+                        name = item.shopService.name,
+                        quantity = item.quantity,
+                        price = item.price,
+                        totalPrice = item.price * item.quantity
+                    )
+                },
+                updateAt = it.updatedAt,
+            )
+        }
     }
 
 

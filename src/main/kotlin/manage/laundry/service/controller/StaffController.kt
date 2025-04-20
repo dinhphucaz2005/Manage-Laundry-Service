@@ -9,6 +9,7 @@ import manage.laundry.service.dto.request.StaffLoginRequest
 import manage.laundry.service.dto.request.UpdateOrderStatusRequest
 import manage.laundry.service.dto.response.OrderResponse
 import manage.laundry.service.dto.response.StaffLoginResponse
+import manage.laundry.service.entity.Order
 import manage.laundry.service.entity.User
 import manage.laundry.service.exception.CustomException
 import manage.laundry.service.service.OrderService
@@ -126,4 +127,53 @@ class StaffController(
     }
 
 
+    @GetMapping("/orders/status/{status}")
+    fun loadOrderByStatus(
+        @PathVariable status: String,
+        @RequestHeader("Authorization") authorizationHeader: String
+    ): ResponseEntity<ApiResponse<List<OrderResponse>>> {
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        val role = jwtUtil.extractUserRole(token)
+
+        if (role != User.Role.STAFF) {
+            throw CustomException("Chỉ nhân viên mới được xem danh sách đơn hàng")
+        }
+
+        val id = jwtUtil.extractUserId(token)
+
+        val enumStatus= Order.Status.entries.find { it.name == status }
+            ?: throw CustomException("Trạng thái đơn hàng không hợp lệ")
+
+        val orders = orderService.getOrdersByStatus(status = enumStatus, staffId = id)
+
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                data = orders,
+                message = "Lấy danh sách đơn hàng thành công"
+            )
+        )
+    }
+
+    @GetMapping("/orders/for-staff")
+    fun getOrdersForStaff(
+        @RequestHeader("Authorization") authorizationHeader: String
+    ): ResponseEntity<ApiResponse<List<OrderResponse>>> {
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        val role = jwtUtil.extractUserRole(token)
+
+        if (role != User.Role.STAFF) {
+            throw CustomException("Chỉ nhân viên mới được xem danh sách đơn hàng")
+        }
+
+        val userId = jwtUtil.extractUserId(token)
+
+        val orders = orderService.getOrdersForStaff(userId)
+
+        return ResponseEntity.ok(
+            ApiResponse.success(
+                data = orders,
+                message = "Lấy danh sách đơn hàng thành công"
+            )
+        )
+    }
 }

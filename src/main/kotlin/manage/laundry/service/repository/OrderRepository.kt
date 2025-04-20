@@ -32,4 +32,31 @@ interface OrderRepository : JpaRepository<Order, Int> {
     )
     fun findAllByCustomerId(customerId: Int): List<Order>
 
+
+    @Query(
+        """
+        SELECT o FROM Order o 
+        WHERE o.shop.id = :shopId AND o.status = :status 
+        ORDER BY o.createdAt DESC
+    """
+    )
+    fun findAllByStatusAndShopId(status: Order.Status, shopId: Int): List<Order>
+
+    @Query(
+        """
+        SELECT o FROM Order o
+        WHERE o.shop.id = :shopId 
+        AND o.status IN (:includedStatuses)
+        ORDER BY o.createdAt DESC
+    """
+    )
+    fun getOrderForStaff(
+        shopId: Int, includedStatuses: List<Order.Status> = listOf(
+            Order.Status.DELIVERED,
+            Order.Status.PAID,
+            Order.Status.PAID_FAILED,
+        )
+    ): List<Order>
+
+
 }
