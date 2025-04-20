@@ -34,7 +34,8 @@ class CustomerAuthService(
             token = token,
             name = user.name,
             email = user.email,
-            phone = user.phone
+            phone = user.phone,
+            userId = user.id
         )
     }
 }
