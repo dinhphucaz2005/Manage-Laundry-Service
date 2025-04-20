@@ -54,7 +54,7 @@ class OrderService(
             Order.Status.CANCELED,
             Order.Status.DELIVERED,
             Order.Status.PAID,
-            Order.Status.PAID_FAILED,
+//            Order.Status.PAID_FAILED,
         )
 
         val orders = orderRepository.findAllActiveOrdersByStaffId(staffId, excludedStatuses)
@@ -160,9 +160,9 @@ class OrderService(
         if (order.status == Order.Status.PAID) {
             throw CustomException("Đơn hàng đã được thanh toán")
         }
-        if (order.status == Order.Status.PAID_FAILED) {
-            throw CustomException("Đơn hàng đã thanh toán không thành công")
-        }
+//        if (order.status == Order.Status.PAID_FAILED) {
+//            throw CustomException("Đơn hàng đã thanh toán không thành công")
+//        }
 
         if (request.newPrice == null || request.newPrice < 0) {
             throw CustomException("Giá không hợp lệ")
@@ -201,9 +201,9 @@ class OrderService(
             throw CustomException("Đơn hàng đã được thanh toán")
         }
 
-        if (order.status == Order.Status.PAID_FAILED) {
-            throw CustomException("Đơn hàng đã thanh toán không thành công")
-        }
+//        if (order.status == Order.Status.PAID_FAILED) {
+//            throw CustomException("Đơn hàng đã thanh toán không thành công")
+//        }
 
         orderRepository.save(
             order.copy(

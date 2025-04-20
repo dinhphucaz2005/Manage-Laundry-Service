@@ -54,7 +54,7 @@ interface OrderRepository : JpaRepository<Order, Int> {
         shopId: Int, includedStatuses: List<Order.Status> = listOf(
             Order.Status.DELIVERED,
             Order.Status.PAID,
-            Order.Status.PAID_FAILED,
+//            Order.Status.PAID_FAILED,
         )
     ): List<Order>
 

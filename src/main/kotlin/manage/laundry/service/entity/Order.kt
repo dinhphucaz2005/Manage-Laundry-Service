@@ -35,6 +35,6 @@ data class Order(
         COMPLETED, /*Đồ đã giặt xong, sẵn sàng trả khách*/
         DELIVERED, /*Khách đã nhận đồ nhưng chưa thanh toán*/
         PAID, /*Khách đã trả tiền (tiền mặt/chuyển khoản/thẻ)*/
-        PAID_FAILED /*Giao dịch thanh toán thất bại (thẻ/ví điện tử)*/
+//        PAID_FAILED /*Giao dịch thanh toán thất bại (thẻ/ví điện tử)*/
     }
 }
