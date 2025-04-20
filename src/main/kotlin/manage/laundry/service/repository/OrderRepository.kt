@@ -95,5 +95,11 @@ interface OrderRepository : JpaRepository<Order, Int> {
     )
     fun countByShopId(shopId: Int): Long
 
+    @Query("""
+        select sum(o.totalPrice) from Order o
+        where o.shop.id = :shopId
+    """)
+    fun getRevenueByShopId(shopId: Int): Long
+
 
 }

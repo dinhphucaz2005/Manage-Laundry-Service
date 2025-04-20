@@ -27,7 +27,7 @@ class ShopStatisticsService @Autowired constructor(
         return ShopStatisticsResponse(
             totalOrders = orderRepository.countByShopId(shopId),
             ordersByStatus = mapResultToOrderByStatus(orderRepository.countOrderByStatus()).associate { it.status to it.orderCount },
-            totalRevenue = paymentRepository.getRevenueByShopId(shopId),
+            totalRevenue = orderRepository.getRevenueByShopId(shopId),
             paymentMethods = paymentRepository.countByPaymentMethod(shopId).associate {
                 it[0] as String to (it[1] as Long)
             },
