@@ -5,9 +5,38 @@ import manage.laundry.service.entity.Shop
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
+data class OrderByStatus(
+    val status: Order.Status,
+    val orderCount: Long
+)
+
+fun mapResultToOrderByStatus(result: List<Array<Any>>): List<OrderByStatus> {
+    return result.map { row ->
+        val statusString = row[0] as? Order.Status ?: throw IllegalArgumentException("Có lỗi xảy ra khi lấy trạng thái đơn hàng")
+        val orderCount = row[1] as? Long ?: throw IllegalArgumentException("Có lỗi xảy ra khi lấy số lượng đơn hàng")
+
+        OrderByStatus(
+            status = statusString,
+            orderCount = orderCount
+        )
+    }
+}
+
+
+
 interface OrderRepository : JpaRepository<Order, Int> {
 
     fun findByShop(shop: Shop): MutableList<Order>
+
+
+    @Query("""
+    SELECT o.status AS status, COUNT(o) AS order_count
+    FROM Order o
+    GROUP BY o.status
+    ORDER BY order_count DESC
+""")
+    fun countOrderByStatus(): List<Array<Any>>
+
 
 
     @Query(
@@ -57,6 +86,14 @@ interface OrderRepository : JpaRepository<Order, Int> {
 //            Order.Status.PAID_FAILED,
         )
     ): List<Order>
+
+    @Query(
+        """
+        select count(o) from Order o
+        where o.shop.id = :shopId
+    """
+    )
+    fun countByShopId(shopId: Int): Long
 
 
 }
