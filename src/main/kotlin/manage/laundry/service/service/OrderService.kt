@@ -15,6 +15,7 @@ class OrderService(
     private val staffRepository: StaffRepository,
     private val orderItemRepository: OrderItemRepository,
     private val userRepository: UserRepository,
+    private val firebaseNotificationService: FirebaseNotificationService
 ) {
 
     fun getOrdersByStatus(status: Order.Status, staffId: Int): List<OrderResponse> {
@@ -22,7 +23,7 @@ class OrderService(
             ?: throw CustomException("Nhân viên không tồn tại")
 
         val orders = orderRepository.findAllByStatusAndShopId(status, staff.shop.id)
-        println(orders)
+
         return orders.map {
             OrderResponse(
                 id = it.id,
@@ -99,11 +100,36 @@ class OrderService(
             throw CustomException("Bạn không có quyền cập nhật đơn hàng này")
         }
 
+        val newStatus = Order.Status.valueOf(status)
         order = order.copy(
-            status = Order.Status.valueOf(status),
+            status = newStatus,
             updatedAt = LocalDateTime.now()
         )
-        orderRepository.save(order)
+        val updatedOrder = orderRepository.save(order)
+
+        // Create a user-friendly message based on status
+        val message = when (newStatus) {
+            Order.Status.PROCESSING -> "Đơn hàng của bạn đang được xử lý"
+            Order.Status.COMPLETED -> "Đơn hàng của bạn đã hoàn thành"
+            Order.Status.DELIVERED -> "Đơn hàng của bạn đã được giao"
+            Order.Status.PAID -> "Đơn hàng của bạn đã được thanh toán"
+            else -> "Trạng thái đơn hàng đã được cập nhật thành ${newStatus.name}"
+        }
+
+        // Send notification to customer
+        firebaseNotificationService.sendOrderNotification(
+            customerId = updatedOrder.customer.id,
+            orderId = updatedOrder.id,
+            orderStatus = updatedOrder.status,
+            message = message
+        )
+
+        firebaseNotificationService.sendOrderNotification(
+            customerId = updatedOrder.customer.id,
+            orderId = orderId,
+            orderStatus = updatedOrder.status,
+            message = message
+        )
     }
 
     fun getOrderHistory(customerId: Int): List<OrderResponse> {
@@ -168,14 +194,27 @@ class OrderService(
             throw CustomException("Giá không hợp lệ")
         }
 
-        //TODO:Send notification to customer
-
-        orderRepository.save(
+        val updatedOrder = orderRepository.save(
             order.copy(
                 totalPrice = request.newPrice,
                 staffResponse = request.staffResponse,
                 status = Order.Status.PENDING
             )
+        )
+
+        // Send notification to customer
+        firebaseNotificationService.sendOrderNotification(
+            customerId = updatedOrder.customer.id,
+            message = "Đơn hàng #${orderId} đã được cập nhật. Giá mới: ${request.newPrice}đ",
+            orderId = updatedOrder.id,
+            orderStatus = updatedOrder.status,
+        )
+
+        firebaseNotificationService.sendOrderNotification(
+            customerId = updatedOrder.customer.id,
+            orderId = orderId,
+            orderStatus = Order.Status.PENDING,
+            message = request.staffResponse ?: "Đơn hàng đã được cập nhật"
         )
     }
 
@@ -201,15 +240,26 @@ class OrderService(
             throw CustomException("Đơn hàng đã được thanh toán")
         }
 
-//        if (order.status == Order.Status.PAID_FAILED) {
-//            throw CustomException("Đơn hàng đã thanh toán không thành công")
-//        }
-
-        orderRepository.save(
+        val updatedOrder = orderRepository.save(
             order.copy(
                 status = Order.Status.CANCELED,
                 staffResponse = request.reason
             )
+        )
+
+        // Send notification to customer
+        firebaseNotificationService.sendOrderNotification(
+            customerId = updatedOrder.customer.id,
+            orderId = updatedOrder.id,
+            orderStatus = updatedOrder.status,
+            message = "Đơn hàng #${orderId} đã bị hủy: ${request.reason}"
+        )
+
+        firebaseNotificationService.sendOrderNotification(
+            customerId = updatedOrder.customer.id,
+            orderId = orderId,
+            orderStatus = Order.Status.CANCELED,
+            message = request.reason
         )
     }
 
