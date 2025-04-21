@@ -36,24 +36,22 @@ class FakeOrderGeneratorService(
     @Scheduled(fixedRate = 3, timeUnit = TimeUnit.MINUTES)
     @Transactional
     fun generateFakeOrders() {
-        if (orderRepository.count() == 0L) {
+        return//Uncomment this line to enable the order generation
+        val shop = shopRepository.findById(2).orElseThrow()
+        val customers = customerRepository.findAll().toList().mapNotNull { customer ->
+            userRepository.findById(customer.user.id).orElseThrow()
+        }
+        val services = shopServiceRepository.findByShop(shop)
 
-            val shop = shopRepository.findById(2).orElseThrow()
-            val customers = customerRepository.findAll().toList().mapNotNull { customer ->
-                userRepository.findById(customer.user.id).orElseThrow()
-            }
-            val services = shopServiceRepository.findByShop(shop)
+        if (customers.isEmpty() || services.isEmpty()) {
+            return
+        }
 
-            if (customers.isEmpty() || services.isEmpty()) {
-                return
-            }
+        // Create 200 random orders
+        val orderCount = 20000
 
-            // Create 200 random orders
-            val orderCount = 20000
-
-            for (i in 1..orderCount) {
-                createRandomOrder(shop, customers, services)
-            }
+        for (i in 1..orderCount) {
+            createRandomOrder(shop, customers, services)
         }
     }
 

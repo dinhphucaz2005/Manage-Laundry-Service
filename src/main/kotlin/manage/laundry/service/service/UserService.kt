@@ -17,6 +17,18 @@ class UserService(
             .orElseThrow { CustomException("Người dùng không tồn tại") }
     }
 
+    fun authenticateSystemAdmin(authorizationHeader: String): User {
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        val userId = jwtUtil.extractUserId(token)
+        val user = getUserById(userId)
+
+        if (user.role != User.Role.SYSTEM_ADMIN) {
+            throw CustomException("Chỉ quản trị viên hệ thống mới được thực hiện hành động này")
+        }
+
+        return user
+    }
+
     fun authenticateCustomer(authorizationHeader: String): User {
         val token = authorizationHeader.removePrefix("Bearer ").trim()
         val userId = jwtUtil.extractUserId(token)

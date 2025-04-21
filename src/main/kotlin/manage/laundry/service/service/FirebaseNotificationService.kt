@@ -59,4 +59,25 @@ class FirebaseNotificationService(
         val base = if (databaseUrl.endsWith("/")) databaseUrl else "$databaseUrl/"
         return "$base$path"
     }
+
+    fun sendSystemNotification(message: String) {
+        val path = "system_notifications.json"
+        val url = buildUrl(path)
+
+        webClient.put()
+            .uri(url)
+            .bodyValue("""
+                {
+                    "message": "$message",
+                    "timestamp": ${System.currentTimeMillis()}
+                }
+            """.trimIndent())
+            .retrieve()
+            .bodyToMono(String::class.java)
+            .subscribe(
+                { println("✅ Notification sent: $it") },
+                { error -> println("❌ Failed to send notification: ${error.message}") }
+            )
+
+    }
 }
